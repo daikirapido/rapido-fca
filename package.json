@@ -1,7 +1,7 @@
 {
-    "name": "daiki-fca",
+    "name": "rapido-fca",
     "version": "0.0.1",
-    "description": "Facebook Fca unofficial",
+    "description": "A Facebook chat api for messenger bots.",
     "main": "index.js",
     "scripts": {
         "start": "node index.js"

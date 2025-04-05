@@ -16,14 +16,14 @@ See the [full changelog](/CHANGELOG.md) for release details.
 ## Install
 If you just want to use facebook-chat-api, you should use this command:
 ```bash
-npm install daiki-fca
+npm install rapido-fca
 ```
 It will download facebook-chat-api from NPM repositories
 
 ### Bleeding edge
 If you want to use bleeding edge (directly from github) to test new features or submit bug report, this is the command for you:
 ```bash
-npm install markzino09/daiki-fca
+npm install markzino09/rapido-fca
 ```
 
 ## Testing your bots
@@ -31,7 +31,7 @@ If you want to test your bots without creating another account on Facebook, you 
 
 ## Example Usage
 ```javascript
-const login = require("daiki-fca");
+const login = require("rapido-fca");
 
 // Create simple echo bot
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
@@ -107,7 +107,7 @@ __Tip__: to find your own ID, you can look inside the cookies. The `userID` is u
 
 __Example (Basic Message)__
 ```js
-const login = require("daiki-fca");
+const login = require("rapido-fca");
 
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -120,7 +120,7 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 
 __Example (File upload)__
 ```js
-const login = require("daiki-fca");
+const login = require("rapido-fca");
 
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -144,7 +144,7 @@ __Example__
 
 ```js
 const fs = require("fs");
-const login = require("daiki-fca");
+const login = require("rapido-fca");
 
 var credentials = {email: "FB_EMAIL", password: "FB_PASSWORD"};
 
@@ -166,7 +166,7 @@ __Example__
 
 ```js
 const fs = require("fs");
-const login = require("daiki-fca");
+const login = require("rapido-fca");
 
 // Simple echo bot. It will repeat everything that you say.
 // Will stop when you say '/stop'
