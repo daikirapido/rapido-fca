@@ -1,5 +1,4 @@
 const utils = require("../utils");
-// @NethWs3Dev
 
 module.exports = function (defaultFuncs, api, ctx) {
   function upload(attachments, callback) {

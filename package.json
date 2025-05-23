@@ -1,6 +1,6 @@
 {
     "name": "rapido-fca",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A Facebook chat api for messenger bots.",
     "main": "index.js",
     "scripts": {
@@ -10,7 +10,7 @@
         "type": "git",
         "url": ""
     },
-    "author": "Mark",
+    "author": "rapidodev",
     "license": "MIT",
     "homepage": "",
     "keywords": [
