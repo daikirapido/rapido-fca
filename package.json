@@ -1,6 +1,6 @@
 {
     "name": "rapido-fca",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "description": "A Facebook chat api for messenger bots.",
     "main": "index.js",
     "scripts": {
