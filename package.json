@@ -1,6 +1,6 @@
 {
-    "name": "rapido-fca",
-    "version": "0.0.3",
+    "name": "aviel-fca",
+    "version": "1.0.1",
     "description": "A Facebook chat api for messenger bots.",
     "main": "index.js",
     "scripts": {
@@ -10,7 +10,7 @@
         "type": "git",
         "url": ""
     },
-    "author": "rapidodev",
+    "author": "avieldev",
     "license": "MIT",
     "homepage": "",
     "keywords": [

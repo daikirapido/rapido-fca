@@ -1,17 +1,17 @@
-# Rapido-FCA: Unofficial Facebook Chat API
+# Aviel-FCA: Unofficial Facebook Chat API
 
 A lightweight, fast, and unofficial API to interact with Facebook Chat programmatically.
 
 ## Installation
 ```bash
-npm install rapido-fca
+npm install aviel-fca
 ```
 
 ## Quick Start
 
 ### Login Example
 ```javascript
-const login = require('rapido-fca');
+const login = require('aviel-fca');
 
 async function login() {
   try {
@@ -32,7 +32,7 @@ login();
 ### Send Message Example
 ```javascript
 const api = await login();
-api.sendMessage("Hello from Rapido-FCA!", "friend_user_id");
+api.sendMessage("Hello from Aviel-FCA!", "friend_user_id");
 ```
 
 ### Listen for Messages
