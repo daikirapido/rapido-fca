@@ -11,7 +11,7 @@ npm install aviel-fca
 
 ### Login Example
 ```javascript
-const login = require('rapido-fca');
+const login = require('aviel-fca');
 
 async function login() {
   try {
