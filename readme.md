@@ -1,10 +1,10 @@
-# Rapido-FCA: Unofficial Facebook Chat API
+# Aviel-FCA: Unofficial Facebook Chat API
 
 A lightweight, fast, and unofficial API to interact with Facebook Chat programmatically.
 
 ## Installation
 ```bash
-npm install rapido-fca
+npm install aviel-fca
 ```
 
 ## Quick Start
