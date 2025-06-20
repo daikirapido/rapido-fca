@@ -32,7 +32,7 @@ login();
 ### Send Message Example
 ```javascript
 const api = await login();
-api.sendMessage("Hello from Rapido-FCA!", "friend_user_id");
+api.sendMessage("Hello from Aviel-FCA!", "friend_user_id");
 ```
 
 ### Listen for Messages
