@@ -129,7 +129,7 @@ function buildAPI(globalOptions, html, jar) {
         return log.error('Login', "Appstate is blocked - please renew it");
     }
     userID = (tiktikCookie || userCookie).cookieString().split("=")[1];
-    log.info("Login", `User ID: ${api.getCurrentUserID()}`);
+
     try { clearInterval(checkVerified); } catch (_) { }
     const clientID = (Math.random() * 2147483648 | 0).toString(16);
     let mqttEndpoint = `wss://edge-chat.facebook.com/chat?region=pnb&sid=${userID}`;
