@@ -3,6 +3,9 @@
 var utils = require("./utils");
 var cheerio = require("cheerio");
 var log = require("npmlog");
+/*var { getThemeColors } = require("../../func/utils/log.js");
+var logger = require("../../func/utils/log.js");
+var { cra, cv, cb, co } = getThemeColors();*/
 log.maxRecordSize = 100;
 var checkVerified = null;
 const Boolean_Option = ['online', 'selfListen', 'listenEvents', 'updatePresence', 'forceLogin', 'autoMarkDelivery', 'autoMarkRead', 'listenTyping', 'autoReconnect', 'emitReady'];
@@ -111,10 +114,10 @@ function buildAPI(globalOptions, html, jar) {
                 }
             } catch { }
             if (fb_dtsg) {
-                log.info("Login", "Found fb_dtsg token");
+                console.log("Found fb_dtsg!");
             }
         } catch (e) {
-            log.error("Login", "Error finding fb_dtsg token");
+            console.log("Error finding fb_dtsg:", e);
         }
     }
     extractFromHTML();
@@ -123,13 +126,13 @@ function buildAPI(globalOptions, html, jar) {
     var userCookie = cookies.find(cookie => cookie.cookieString().startsWith("c_user="));
     var tiktikCookie = cookies.find(cookie => cookie.cookieString().startsWith("i_user="));
     if (!userCookie && !tiktikCookie) {
-        return log.error("Login", "Invalid cookie state");
+        return log.error("Error! Your cookiestate is not valid!");
     }
     if (html.includes("/checkpoint/block/?next")) {
-        return log.error('Login', "Appstate is blocked - please renew it");
+        return log.error('error', "Appstate is dead rechange it!", 'error');
     }
     userID = (tiktikCookie || userCookie).cookieString().split("=")[1];
-
+    //logger.log(`${cra(`[ CONNECT ]`)} Logged in as ${userID}`, "DATABASE");
     try { clearInterval(checkVerified); } catch (_) { }
     const clientID = (Math.random() * 2147483648 | 0).toString(16);
     let mqttEndpoint = `wss://edge-chat.facebook.com/chat?region=pnb&sid=${userID}`;
@@ -138,8 +141,8 @@ function buildAPI(globalOptions, html, jar) {
     try {
         const endpointMatch = html.match(/"endpoint":"([^"]+)"/);
         if (endpointMatch.input.includes("601051028565049")) {
-            log.error("Login", "Login error detected");
-            ditconmemay = true;
+          console.log(`login error.`);
+          ditconmemay = true;
         }
         if (endpointMatch) {
             mqttEndpoint = endpointMatch[1].replace(/\\\//g, '/');
@@ -147,9 +150,9 @@ function buildAPI(globalOptions, html, jar) {
             region = url.searchParams.get('region')?.toUpperCase() || "PNB";
         }
     } catch (e) {
-        log.warn("Login", "Using default MQTT endpoint");
+        console.log('Using default MQTT endpoint');
     }
-    log.info("Login", `Connecting to region: ${region}`);
+    log.info('Logging in...');
     var ctx = {
         userID: userID,
         jar: jar,
@@ -211,10 +214,11 @@ function buildAPI(globalOptions, html, jar) {
 
             return newDtsg;
         } catch (e) {
-            log.error("Login", "Error getting fresh dtsg token");
+            console.log("Error getting fresh dtsg:", e);
             return null;
         }
     };
+    //if (noMqttData) api.htmlData = noMqttData;
     require('fs').readdirSync(__dirname + '/src/').filter(v => v.endsWith('.js')).forEach(v => { api[v.replace('.js', '')] = require(`./src/${v}`)(utils.makeDefaults(html, userID, ctx), api, ctx); });
     api.listen = api.listenMqtt;
     return {
@@ -247,7 +251,7 @@ function makeLogin(jar, email, password, loginOptions, callback, prCallback) {
                 const cookieData = JSON.parse("[\"" + utils.getFrom(val, "", "]") + "]");
                 jar.setCookie(utils.formatCookie(cookieData, "facebook"), "https://www.facebook.com");
             });
-            log.info("Login", "Attempting login...");
+            log.info("Logging in...");
             const loginRes = await utils.post(
                 "https://www.facebook.com/login/device-based/regular/login/?login_attempt=1&lwv=110",
                 jar,
@@ -258,7 +262,7 @@ function makeLogin(jar, email, password, loginOptions, callback, prCallback) {
             const headers = loginRes.headers;
             if (!headers.location) throw new Error("Wrong username/password.");
             if (headers.location.includes('https://www.facebook.com/checkpoint/')) {
-                log.info("Login", "Login approvals enabled");
+                log.info("login", "You have login approvals turned on.");
                 const checkpointRes = await utils.get(headers.location, jar, null, loginOptions);
                 await utils.saveCookies(jar)(checkpointRes);
                 const checkpointHtml = checkpointRes.body;
@@ -317,6 +321,7 @@ function makeLogin(jar, email, password, loginOptions, callback, prCallback) {
         }
     };
 }
+
 
 function loginHelper(appState, email, password, globalOptions, callback, prCallback) {
     let mainPromise = null;
@@ -392,13 +397,14 @@ function loginHelper(appState, email, password, globalOptions, callback, prCallb
 
     mainPromise
         .then(async () => {
-            log.info("Login", `Successfully logged in as ${ctx.userID} in region ${ctx.region}`);
+            log.info('Login successful');
             callback(null, api);
         })
         .catch(e => {
             callback(e);
         });
 }
+
 
 function login(loginData, options, callback) {
     if (utils.getType(options) === 'Function' || utils.getType(options) === 'AsyncFunction') {
@@ -449,5 +455,6 @@ function login(loginData, options, callback) {
     }
     return returnPromise;
 }
+
 
 module.exports = login;
