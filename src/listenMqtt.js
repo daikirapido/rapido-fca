@@ -34,6 +34,202 @@ var topics = [
     "/webrtc_response",
 ];
 
+
+function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
+    var chatOn = ctx.globalOptions.online;
+    var foreground = false;
+
+    var sessionID = Math.floor(Math.random() * 9007199254740991) + 1;
+    var GUID = utils.getGUID();
+    const username = {
+        u: ctx.userID,
+        s: sessionID,
+        chat_on: chatOn,
+        fg: foreground,
+        d: GUID,
+        ct: 'websocket',
+        aid: '219994525426954',
+        aids: null,
+        mqtt_sid: '',
+        cp: 3,
+        ecp: 10,
+        st: [],
+        pm: [],
+        dc: '',
+        no_auto_fg: true,
+        gas: null,
+        pack: [],
+        p: null,
+        php_override: ""
+    };
+    var cookies = ctx.jar.getCookies("https://www.facebook.com").join("; ");
+
+    var host;
+    if (ctx.mqttEndpoint) host = `${ctx.mqttEndpoint}&sid=${sessionID}&cid=${GUID}`;
+    else if (ctx.region) host = `wss://edge-chat.facebook.com/chat?region=${ctx.region.toLocaleLowerCase()}&sid=${sessionID}&cid=${GUID}`;
+    else host = `wss://edge-chat.facebook.com/chat?sid=${sessionID}&cid=${GUID}`;
+
+    const options = {
+        clientId: 'mqttwsclient',
+        protocolId: 'MQIsdp',
+        protocolVersion: 3,
+        username: JSON.stringify(username),
+        clean: true,
+        keepalive: 60,
+        reschedulePings: true,
+        reconnectPeriod: 3,
+        wsOptions: {
+            headers: {
+                Cookie: cookies,
+                Origin: 'https://www.facebook.com',
+                'User-Agent': ctx.globalOptions.userAgent || 'Mozilla/5.0',
+                Referer: 'https://www.facebook.com/',
+                Host: new URL(host).hostname
+            },
+            origin: 'https://www.facebook.com',
+            protocolVersion: 13,
+            binaryType: 'arraybuffer'
+        }
+    };
+
+    if (typeof ctx.globalOptions.proxy !== "undefined") {
+        var agent = new HttpsProxyAgent(ctx.globalOptions.proxy);
+        options.wsOptions.agent = agent;
+    }
+
+    const wsStream = websocket(host, options.wsOptions);
+    ctx.mqttClient = mqtt.connect(wsStream, options);
+    global.mqttClient = ctx.mqttClient;
+
+    ctx.mqttClient.on('error', function (err) {
+        log.error("listenMqtt", err);
+        ctx.mqttClient.end();
+        if (ctx.globalOptions.autoReconnect) getSeqID();
+        else globalCallback({ type: "stop_listen", error: "Connection refused: Server unavailable" }, null);
+    });
+
+    ctx.mqttClient.on('connect', function () {
+        topics.forEach(topicsub => ctx.mqttClient.subscribe(topicsub));
+
+        var topic;
+        var queue = {
+            sync_api_version: 10,
+            max_deltas_able_to_process: 1000,
+            delta_batch_size: 500,
+            encoding: "JSON",
+            entity_fbid: ctx.userID,
+        };
+
+        if (ctx.syncToken) {
+            topic = "/messenger_sync_get_diffs";
+            queue.last_seq_id = ctx.lastSeqId;
+            queue.sync_token = ctx.syncToken;
+        } else {
+            topic = "/messenger_sync_create_queue";
+            queue.initial_titan_sequence_id = ctx.lastSeqId;
+            queue.device_params = null;
+        }
+
+        ctx.mqttClient.publish(topic, JSON.stringify(queue), { qos: 1, retain: false });
+
+        var rTimeout = setTimeout(function () {
+            ctx.mqttClient.end();
+            getSeqID();
+        }, 5000);
+
+        ctx.tmsWait = function () {
+            clearTimeout(rTimeout);
+            ctx.globalOptions.emitReady ? globalCallback({ type: "ready", error: null }) : "";
+            delete ctx.tmsWait;
+        };
+    });
+
+    ctx.mqttClient.on('message', function (topic, message, _packet) {
+        try {
+            var jsonMessage = JSON.parse(message);
+        } catch (ex) {
+            return log.error("listenMqtt", ex);
+        }
+
+        if (topic === "/t_ms") {
+            if (ctx.tmsWait && typeof ctx.tmsWait == "function") ctx.tmsWait();
+
+            if (jsonMessage.firstDeltaSeqId && jsonMessage.syncToken) {
+                ctx.lastSeqId = jsonMessage.firstDeltaSeqId;
+                ctx.syncToken = jsonMessage.syncToken;
+            }
+
+            if (jsonMessage.lastIssuedSeqId) ctx.lastSeqId = parseInt(jsonMessage.lastIssuedSeqId);
+
+            for (var i in jsonMessage.deltas) {
+                var delta = jsonMessage.deltas[i];
+                parseDelta(defaultFuncs, api, ctx, globalCallback, { "delta": delta });
+            }
+        } else if (topic === "/thread_typing" || topic === "/orca_typing_notifications") {
+            var typ = {
+                type: "typ",
+                isTyping: !!jsonMessage.state,
+                from: jsonMessage.sender_fbid.toString(),
+                threadID: utils.formatID((jsonMessage.thread || jsonMessage.sender_fbid).toString())
+            };
+            (function () { globalCallback(null, typ); })();
+        } else if (topic === "/orca_presence") {
+            if (!ctx.globalOptions.updatePresence) {
+                for (var i in jsonMessage.list) {
+                    var data = jsonMessage.list[i];
+                    var userID = data["u"];
+
+                    var presence = {
+                        type: "presence",
+                        userID: userID.toString(),
+                        timestamp: data["l"] * 1000,
+                        statuses: data["p"]
+                    };
+                    (function () { globalCallback(null, presence); })();
+                }
+            }
+        }
+    });
+
+    ctx.mqttClient.on('close', function () {
+        // Optional reconnect logic or logging
+    });
+}
+ct";
+var utils = require("../utils");
+var log = require("npmlog");
+var mqtt = require('mqtt');
+var websocket = require('websocket-stream');
+var HttpsProxyAgent = require('https-proxy-agent');
+const EventEmitter = require('events');
+const debugSeq = false;
+var identity = function () { };
+var form = {};
+var getSeqID = function () { };
+var topics = [
+    "/legacy_web",
+    "/webrtc",
+    "/rtc_multi",
+    "/onevc",
+    "/br_sr", //Notification
+    //Need to publish /br_sr right after this
+    "/sr_res",
+    "/t_ms",
+    "/thread_typing",
+    "/orca_typing_notifications",
+    "/notify_disconnect",
+    //Need to publish /messenger_sync_create_queue right after this
+    "/orca_presence",
+    //Will receive /sr_res right here.
+
+    "/inbox",
+    "/mercury",
+    "/messaging_events",
+    "/orca_message_notifications",
+    "/pp",
+    "/webrtc_response",
+];
+
 function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
     //Don't really know what this does but I think it's for the active state?
     //TODO: Move to ctx when implemented
@@ -436,7 +632,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                 fmtMsg = utils.formatDeltaEvent(v.delta);
             } catch (err) {
                 return globalCallback({
-                    error: "Lỗi gòi!!",
+                    error: "Lá»—i gÃ²i!!",
                     detail: err,
                     res: v.delta,
                     type: "parse_error"
