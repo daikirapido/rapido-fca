@@ -1,6 +1,6 @@
 {
     "name": "aviel-fca",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "A Facebook chat api for messenger bots.",
     "main": "index.js",
     "scripts": {
