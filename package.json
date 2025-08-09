@@ -2,17 +2,6 @@
     "name": "rapido-fca",
     "version": "0.0.10",
     "description": "A Facebook chat api for messenger bots.",
-    "main": "index.js",
-    "scripts": {
-        "start": "node index.js"
-    },
-    "repository": {
-        "type": "git",
-        "url": ""
-    },
-    "author": "rapidodev",
-    "license": "MIT",
-    "homepage": "",
     "keywords": [
         "facebook",
         "chat",
@@ -21,6 +10,21 @@
         "messenger",
         "chatbot"
     ],
+    "homepage": "",
+    "repository": {
+        "type": "git",
+        "url": ""
+    },
+    "license": "MIT",
+    "author": "rapidodev",
+    "type": "commonjs",
+    "main": "index.js",
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "start": "node index.js"
+    },
     "dependencies": {
         "axios": "^1.6.5",
         "bluebird": "^3.7.2",
@@ -39,8 +43,5 @@
     },
     "engines": {
         "node": ">=10.x"
-    },
-    "directories": {
-        "test": "test"
     }
 }
