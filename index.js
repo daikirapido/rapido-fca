@@ -135,8 +135,8 @@ function buildAPI(globalOptions, html, jar) {
     //logger.log(`${cra(`[ CONNECT ]`)} Logged in as ${userID}`, "DATABASE");
     try { clearInterval(checkVerified); } catch (_) { }
     const clientID = (Math.random() * 2147483648 | 0).toString(16);
-    let mqttEndpoint = `wss://edge-chat.facebook.com/chat?region=pnb&sid=${userID}`;
-    let region = "PNB";
+    let mqttEndpoint = `wss://edge-chat.facebook.com/chat?region=frc&sid=${userID}`;
+    let region = "FRC";
 
     try {
         const endpointMatch = html.match(/"endpoint":"([^"]+)"/);
@@ -147,7 +147,7 @@ function buildAPI(globalOptions, html, jar) {
         if (endpointMatch) {
             mqttEndpoint = endpointMatch[1].replace(/\\\//g, '/');
             const url = new URL(mqttEndpoint);
-            region = url.searchParams.get('region')?.toUpperCase() || "PNB";
+            region = url.searchParams.get('region')?.toUpperCase() || "FRC";
         }
     } catch (e) {
         console.log('Using default MQTT endpoint');
